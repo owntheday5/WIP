@@ -3,318 +3,321 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROJECT: UNTITLED | Survival Horror</title>
+    <title>NO SIGNAL | SYSTEM FAILURE</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=VT323&display=swap" rel="stylesheet">
 
     <style>
-        /* --- RESET & VARIABLES --- */
+        /* --- RESET & CORE COLORS --- */
         :root {
-            --bg-color: #050505;
-            --text-color: #e0e0e0;
-            --accent-red: #ff003c;
-            --accent-dim: #4a0011;
-            --scanline-color: rgba(18, 16, 16, 0.5);
+            --bg-color: #020202;
+            --terminal-green: #33ff00; /* Optional usage */
+            --blood-red: #ff0000;
+            --dark-red: #4a0000;
+            --gray: #2a2a2a;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Share Tech Mono', monospace;
+            color: #ddd;
+            font-family: 'VT323', monospace;
             overflow-x: hidden;
-            line-height: 1.6;
+            font-size: 1.2rem;
         }
 
-        /* --- CRT SCANLINE EFFECT OVERLAY --- */
+        /* --- THE STATIC & CRT EFFECTS --- */
+        
+        /* The moving static noise background */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 990;
+            opacity: 0.08;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            animation: static-anim 0.2s infinite;
+        }
+
+        /* The horizontal scanlines */
         .scanlines {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: repeating-linear-gradient(
                 to bottom,
-                rgba(255,255,255,0),
-                rgba(255,255,255,0) 50%,
-                rgba(0,0,0,0.2) 50%,
-                rgba(0,0,0,0.2)
+                rgba(0,0,0,0),
+                rgba(0,0,0,0) 2px,
+                rgba(0,0,0,0.3) 2px,
+                rgba(0,0,0,0.3) 4px
             );
-            background-size: 100% 4px;
             pointer-events: none;
-            z-index: 999;
-            animation: flicker 0.15s infinite;
+            z-index: 991;
         }
 
-        .vignette {
+        /* Screen flicker */
+        .flicker-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: radial-gradient(circle, transparent 50%, black 100%);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 0, 0, 0.02);
+            opacity: 0;
             pointer-events: none;
-            z-index: 998;
-        }
-
-        /* --- TYPOGRAPHY & ANIMATIONS --- */
-        h1, h2, h3 {
-            font-family: 'Creepster', cursive;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .glitch {
-            position: relative;
-            color: white;
-            animation: glitch-skew 1s infinite linear alternate-reverse;
-        }
-        
-        .glitch::before, .glitch::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .glitch::before {
-            left: 2px;
-            text-shadow: -1px 0 var(--accent-red);
-            clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim 5s infinite linear alternate-reverse;
-        }
-
-        .glitch::after {
-            left: -2px;
-            text-shadow: -1px 0 #00ffff;
-            clip: rect(44px, 450px, 56px, 0);
-            animation: glitch-anim2 5s infinite linear alternate-reverse;
+            z-index: 992;
+            animation: flicker-anim 4s infinite;
         }
 
         /* --- LAYOUT --- */
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 40px 20px;
             position: relative;
             z-index: 10;
         }
 
-        /* --- HERO SECTION --- */
-        header {
-            height: 90vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            border-bottom: 1px solid var(--accent-dim);
-        }
-
+        /* --- TYPOGRAPHY --- */
         h1 {
-            font-size: 4rem;
-            color: var(--accent-red);
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px var(--accent-red);
-        }
-
-        p.subtitle {
-            font-size: 1.2rem;
-            color: #888;
-            max-width: 600px;
-            margin-bottom: 40px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 15px 40px;
-            background: transparent;
-            border: 2px solid var(--accent-red);
-            color: var(--accent-red);
-            font-family: 'Share Tech Mono', monospace;
-            text-transform: uppercase;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.2rem;
-            transition: 0.3s;
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            background: var(--accent-red);
-            color: black;
-            box-shadow: 0 0 20px var(--accent-red);
-        }
-
-        /* --- SHOWCASE GRID --- */
-        .section-title {
+            font-family: 'Rubik Glitch', cursive;
+            font-size: 5rem;
+            color: var(--blood-red);
             text-align: center;
-            font-size: 2.5rem;
-            margin: 80px 0 40px;
+            text-shadow: 2px 2px 0px var(--dark-red), -1px -1px 0 #000;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        h2 {
+            font-family: 'Rubik Glitch', cursive;
             color: #fff;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px var(--blood-red);
+            border-bottom: 2px solid var(--blood-red);
+            display: inline-block;
         }
 
-        .media-grid {
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            margin-bottom: 60px;
+            text-transform: uppercase;
+        }
+
+        .subtitle span {
+            background: var(--blood-red);
+            color: #000;
+            padding: 0 5px;
+            font-weight: bold;
+        }
+
+        /* --- THE GRID (IMAGES & VIDEO) --- */
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 80px;
         }
 
-        .media-card {
-            background: #111;
+        .card {
+            background: #000;
             border: 1px solid #333;
-            padding: 10px;
-            transition: transform 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.1);
         }
 
-        .media-card:hover {
-            transform: scale(1.02);
-            border-color: var(--accent-red);
+        .card::before {
+            content: "REC ●";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: var(--blood-red);
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            z-index: 5;
+            animation: blink 1s infinite;
+            text-shadow: 0 0 5px red;
         }
 
-        .media-card img, .media-card video {
+        .card::after {
+            content: "";
+            position: absolute;
+            top:0; left:0; width:100%; height:100%;
+            background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.8) 100%);
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .card img, .card video {
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover;
             display: block;
-            filter: grayscale(80%);
-            transition: 0.5s;
+            filter: sepia(50%) hue-rotate(-50deg) contrast(1.2) brightness(0.8);
+            transition: 0.3s ease;
         }
 
-        .media-card:hover img, .media-card:hover video {
-            filter: grayscale(0%);
+        .card:hover img, .card:hover video {
+            filter: none; /* Restore color on hover */
         }
 
-        .caption {
-            padding-top: 10px;
-            font-size: 0.9rem;
-            color: #666;
+        .card-label {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: var(--blood-red);
+            background: rgba(0,0,0,0.8);
+            padding: 2px 8px;
+            font-size: 1rem;
+            z-index: 5;
+            border: 1px solid var(--dark-red);
         }
 
-        /* --- DOWNLOAD SECTION --- */
-        #download {
+        /* --- DOWNLOAD BUTTON --- */
+        .download-section {
             text-align: center;
-            padding: 100px 20px;
-            background: #0a0a0a;
+            border: 2px dashed var(--gray);
+            padding: 50px;
+            background: rgba(10,10,10,0.8);
             margin-top: 50px;
-            border-top: 1px solid var(--accent-dim);
         }
 
-        .specs {
+        .btn-horror {
+            display: inline-block;
             margin-top: 20px;
-            color: #555;
-            font-size: 0.8rem;
+            padding: 20px 50px;
+            background: var(--blood-red);
+            color: #000;
+            text-decoration: none;
+            font-size: 2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-family: 'VT323', monospace;
+            letter-spacing: 2px;
+            clip-path: polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%);
+            transition: 0.2s;
+            animation: shake 5s infinite;
         }
 
-        footer {
-            text-align: center;
-            padding: 40px;
-            color: #444;
-            font-size: 0.8rem;
+        .btn-horror:hover {
+            background: #fff;
+            color: var(--blood-red);
+            box-shadow: 0 0 20px var(--blood-red);
+            transform: scale(1.05);
         }
 
-        /* --- ANIMATION KEYFRAMES --- */
-        @keyframes glitch-anim {
-            0% { clip: rect(31px, 9999px, 94px, 0); }
-            20% { clip: rect(6px, 9999px, 3px, 0); }
-            40% { clip: rect(68px, 9999px, 11px, 0); }
-            60% { clip: rect(95px, 9999px, 52px, 0); }
-            80% { clip: rect(21px, 9999px, 23px, 0); }
-            100% { clip: rect(82px, 9999px, 68px, 0); }
-        }
-        @keyframes glitch-anim2 {
-            0% { clip: rect(65px, 9999px, 100px, 0); }
-            20% { clip: rect(32px, 9999px, 38px, 0); }
-            40% { clip: rect(6px, 9999px, 78px, 0); }
-            60% { clip: rect(44px, 9999px, 16px, 0); }
-            80% { clip: rect(10px, 9999px, 74px, 0); }
-            100% { clip: rect(96px, 9999px, 4px, 0); }
-        }
-        @keyframes flicker {
-            0% { opacity: 0.9; }
-            5% { opacity: 0.8; }
-            10% { opacity: 0.9; }
-            11% { opacity: 0.4; }
-            12% { opacity: 0.9; }
-            100% { opacity: 0.9; }
+        /* --- ANIMATIONS --- */
+        @keyframes static-anim {
+            0% { transform: translate(0,0); }
+            10% { transform: translate(-5%, -5%); }
+            20% { transform: translate(-10%, 5%); }
+            30% { transform: translate(5%, -10%); }
+            40% { transform: translate(-5%, 15%); }
+            50% { transform: translate(-10%, 5%); }
+            60% { transform: translate(15%, 0); }
+            70% { transform: translate(0, 10%); }
+            80% { transform: translate(-15%, 0); }
+            90% { transform: translate(10%, 5%); }
+            100% { transform: translate(5%, 0); }
         }
 
-        /* Responsive */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes flicker-anim {
+            0% { opacity: 0; }
+            5% { opacity: 0.1; }
+            10% { opacity: 0; }
+            95% { opacity: 0; }
+            96% { opacity: 0.2; }
+            97% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        /* Mobile Fix */
         @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; }
+            h1 { font-size: 3.5rem; }
         }
+
     </style>
 </head>
 <body>
 
+    <div class="noise-overlay"></div>
     <div class="scanlines"></div>
-    <div class="vignette"></div>
+    <div class="flicker-overlay"></div>
 
     <div class="container">
         
         <header>
-            <h1 class="glitch" data-text="PROJECT: UNTITLED">PROJECT: UNTITLED</h1>
-            <p class="subtitle">
-                Something is walking the halls. You are not alone.<br>
-                A free-roam survival horror experience.
-            </p>
-            <a href="#download" class="btn">Initialize Download</a>
+            <br><br>
+            <h1>PROJECT UNTITLED</h1>
+            <p class="subtitle">FREE ROAM /// <span>SURVIVAL</span> /// HORROR</p>
         </header>
 
-        <section id="showcase">
-            <h2 class="section-title">Surveillance Feed</h2>
-            
-            <div class="media-grid">
-                <div class="media-card">
-                    <video controls>
-                        <source src="your-clip-1.mp4" type="video/mp4">
-                        Signal Lost...
-                    </video>
-                    <div class="caption">/// CAM_04: MAIN_HALLWAY</div>
-                </div>
-
-                <div class="media-card">
-                    <img src="https://via.placeholder.com/400x225/111/333?text=SCREENSHOT+PLACEHOLDER" alt="Game Screenshot">
-                    <div class="caption">/// CAM_02: STORAGE</div>
-                </div>
-
-                 <div class="media-card">
-                    <video controls>
-                        <source src="your-clip-2.mp4" type="video/mp4">
-                        Signal Lost...
-                    </video>
-                    <div class="caption">/// CAM_09: OFFICE</div>
-                </div>
+        <section>
+            <h2>> SECURITY LOGS</h2>
+            <div class="grid">
                 
-                 <div class="media-card">
-                    <img src="https://via.placeholder.com/400x225/111/333?text=SCREENSHOT+PLACEHOLDER" alt="Game Screenshot">
-                    <div class="caption">/// CAM_01: ENTRY</div>
+                <div class="card">
+                    <video autoplay loop muted playsinline>
+                        <source src="video1.mp4" type="video/mp4">
+                    </video>
+                    <div class="card-label">CAM_08 [KITCHEN]</div>
                 </div>
+
+                <div class="card">
+                    <img src="https://via.placeholder.com/600x400/111/500?text=NO+SIGNAL" alt="Game Screenshot">
+                    <div class="card-label">CAM_02 [HALLWAY]</div>
+                </div>
+
+                <div class="card">
+                    <video autoplay loop muted playsinline>
+                        <source src="video2.mp4" type="video/mp4">
+                    </video>
+                    <div class="card-label">CAM_04 [BASEMENT]</div>
+                </div>
+
+                <div class="card">
+                    <img src="https://via.placeholder.com/600x400/000/333?text=ERROR" alt="Game Screenshot">
+                    <div class="card-label">CAM_01 [EXTERIOR]</div>
+                </div>
+
             </div>
         </section>
 
-        <section id="download">
-            <h2 class="section-title" style="color: var(--accent-red);">System Breach Available</h2>
-            <p style="margin-bottom: 20px;">The files are ready. Are you sure you want to proceed?</p>
+        <section class="download-section">
+            <h2 style="border:none; font-size: 3rem; color: var(--blood-red);">SYSTEM BREACH READY</h2>
+            <p>WARNING: This software contains loud noises and disturbing imagery.</p>
+            <br>
+            <p>BUILD_VER: 0.1.4a // UNSTABLE</p>
             
-            <a href="#" class="btn">DOWNLOAD v0.1 ALPHA</a>
-
-            <div class="specs">
-                <p>Windows 10/11 | 4GB RAM | Graphics Card Required</p>
-                <p>Warning: Contains flashing lights and jumpscares.</p>
-            </div>
+            <a href="YOUR_DOWNLOAD_LINK_HERE" class="btn-horror">DOWNLOAD GAME</a>
         </section>
 
-        <footer>
-            <p>&copy; 2024 Project Untitled. Hosted on GitHub Pages.</p>
+        <footer style="text-align: center; margin-top: 50px; color: #444; font-size: 0.8rem;">
+            <p>DO NOT DISTRIBUTE WITHOUT AUTHORIZATION</p>
+            <p>&copy; 2024 UNKNOWN DEVELOPER</p>
         </footer>
 
     </div>
